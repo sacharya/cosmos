@@ -1,10 +1,13 @@
 from config import config
+from dbapi import save_trust
+from dbapi import get_all_trusts_by_trustor
 from flask import flash
 from flask import redirect
 from flask import render_template
 from flask import request
 from flask import session
 from flask import url_for
+from functools import wraps
 from app import app
 
 from keystoneclient.v2_0 import client as keystone_api
@@ -15,6 +18,16 @@ from novaclient.v1_1 import client as nova_api
 
 auth_url_v2 = config.get('default', 'auth_url_v2')
 auth_url_v3 = config.get('default', 'auth_url_v3')
+
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in session:
+            flash("Unauthenticated user.")
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 @app.route('/index')
@@ -41,37 +54,55 @@ def login():
         print e
         flash("Invalid username or passord.")
         return redirect(url_for('login'))
-    return redirect(url_for('delegate'))
+    return redirect(url_for('setup'))
 
 
-@app.route('/delegate')
-def delegate():
-    if 'username' not in session:
-        flash("Unauthenticated user.")
-        return redirect(url_for('login'))
+@app.route('/logout')
+def logout():    
+    session.clear()
+    return redirect(url_for('login'))
 
+
+@app.route('/setup')
+@login_required
+def setup():
+    username = config.get('service', 'username')
+    auth_url_v3 = config.get('service', 'auth_url_v3')
+    compute_url = config.get('service', 'compute_url')
+    trustee = {}
+    trustee['username'] = username
+    trustee['auth_url_v3'] = auth_url_v3
+    trustee['compute_url'] = compute_url
+
+    return render_template("setup.html", trustee=trustee)
+
+
+@app.route('/trust', methods=['POST'])
+@login_required
+def create_trust():
     username = config.get('service', 'username')
     password = config.get('service', 'password')
-    auth_url_v31 = config.get('service', 'auth_url_v3')
+    auth_url_v3 = config.get('service', 'auth_url_v3')
     compute_url = config.get('service', 'compute_url')
 
     trustee = keystonev3_api.Client(
-        username=username, password=password, auth_url=auth_url_v31)
+        username=username, password=password, auth_url=auth_url_v3)
 
     token = session['token']
-    truster = keystonev3_api.Client(token=token, auth_url=auth_url_v3)
-    trust = truster.trusts.create(trustee.user_id, session['user_id'],
+    print token
+    trustor = keystonev3_api.Client(token=token, auth_url=auth_url_v3)
+    trust = trustor.trusts.create(trustee.user_id, session['user_id'],
                                   role_names=['Member'],
-                                  project=truster.tenant_id,
+                                  project=trustor.tenant_id,
                                   impersonation=True)
 
-    bypass_url = compute_url + truster.project_id
-    trustee_new = keystonev3_api.Client(username=trustee.username,
-                                        token=trustee.auth_token,
-                                        trust_id=trust.id,
-                                        auth_url=auth_url_v31)
+    save_trust(session['username'], trustee.username, trust.id)
+    return redirect(url_for('trusts'))
 
-    nova = nova_api.Client(
-        auth_token=trustee_new.auth_token, bypass_url=bypass_url)
-    servers = nova.servers.list()
-    return "Delegation is workin"
+
+@app.route('/trusts', methods=['GET'])
+@login_required
+def trusts():
+    username = session['username']
+    trusts = get_all_trusts_by_trustor(username)
+    return render_template("trusts_list.html", trusts=trusts)

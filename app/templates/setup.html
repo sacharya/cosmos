@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+Setup
+<form action="/trust" method="POST">
+<p/>
+<table border="0">
+  <tr>
+    <th>Activate</th>
+    <th>Username</th>
+    <th>Auth V3 Endpoint</th>
+    <th>Compute Endpoint</th>
+  </tr>
+  <tr>
+    <td><input type="checkbox" name="activate" value="username"></td>
+    <td>{{ trustee.username }}</td>
+    <td>{{ trustee.auth_url_v3 }}</td>
+    <td>{{ trustee.compute_url }}</td>
+  </tr>
+</table>
+<p/>
+<input type="submit" value="Submit">
+</form>
+{% endblock %}

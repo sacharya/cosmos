@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+List Trusts
+<p/>
+<table border="0">
+  <tr>
+    <th>Trustor</th>
+    <th>Trustee</th>
+    <th>Trust</th>
+  </tr>
+  {% for trust in trusts %}
+  <tr>
+    <td>{{ trust.trustor_username }}</td>
+    <td>{{ trust.trustee_username }}</td>
+    <td>{{ trust.trust_id }}</td>
+  </tr>
+  {% endfor %}
+</table>
+<p/>
+{% endblock %}
