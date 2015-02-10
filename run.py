@@ -1,4 +1,8 @@
 #!venv/bin/python
 from app import app
-app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
-app.run(host='0.0.0.0', port=80, debug=True)
+from config import config
+
+app.secret_key = config.get('main', 'secret_key')
+app.run(host=config.get('main', 'bind_address'),
+        port=int(config.get('main', 'bind_port')),
+        debug=True)
