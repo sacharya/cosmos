@@ -1,5 +1,22 @@
 from app import db
 
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80))
+    tenant_id = db.Column(db.String(80))
+    user_id = db.Column(db.String(80))
+
+    def __init__(self, username, tenant_id, user_id):
+        self.username = username
+        self.tenant_id = tenant_id
+        self.user_id = user_id
+             
+    def __repr__(self):
+        return '<Username %s. Tenant ID %s. User ID %s>' % (self.username, self.tenant_id, self.user_id)
+
+    def is_authenticated(self):
+      return True
+
 
 class Trust(db.Model):
     id = db.Column(db.Integer, primary_key=True)
