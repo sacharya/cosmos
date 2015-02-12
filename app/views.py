@@ -18,6 +18,7 @@ from novaclient.v1_1 import client as nova_api
 auth_url_v2 = config.get('default', 'auth_url_v2')
 auth_url_v3 = config.get('default', 'auth_url_v3')
 
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -37,9 +38,9 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-      if 'username' in session:
-          return redirect(url_for('trusts'))  
-      return render_template("login.html", title="Login")
+        if 'username' in session:
+            return redirect(url_for('trusts'))
+        return render_template("login.html", title="Login")
     username = request.form.get('username')
     password = request.form.get('password')
     remember_me = request.form.get('remember_me')
@@ -50,7 +51,8 @@ def login():
         session['token'] = keystone.auth_token
         session['tenant_id'] = keystone.tenant_id
         session['user_id'] = keystone.user_id
-        dbapi.save_or_update_user(keystone.username, keystone.tenant_id, keystone.user_id)
+        dbapi.save_or_update_user(
+            keystone.username, keystone.tenant_id, keystone.user_id)
     except Unauthorized as e:
         print e
         flash("Invalid username or passord.")
@@ -59,7 +61,7 @@ def login():
 
 
 @app.route('/logout')
-def logout():    
+def logout():
     session.clear()
     return redirect(url_for('login'))
 
