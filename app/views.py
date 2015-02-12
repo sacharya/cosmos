@@ -1,8 +1,6 @@
+from app import app
+from app.db import dbapi
 from config import config
-from dbapi import save_trust
-from dbapi import get_all_trusts_by_trustor
-from dbapi import save_or_update_user
-from dbapi import get_user_by_username
 from flask import flash
 from flask import redirect
 from flask import render_template
@@ -10,7 +8,6 @@ from flask import request
 from flask import session
 from flask import url_for
 from functools import wraps
-from app import app
 
 from keystoneclient.v2_0 import client as keystone_api
 from keystoneclient.v3 import client as keystonev3_api
@@ -53,7 +50,7 @@ def login():
         session['token'] = keystone.auth_token
         session['tenant_id'] = keystone.tenant_id
         session['user_id'] = keystone.user_id
-        save_or_update_user(keystone.username, keystone.tenant_id, keystone.user_id)
+        dbapi.save_or_update_user(keystone.username, keystone.tenant_id, keystone.user_id)
     except Unauthorized as e:
         print e
         flash("Invalid username or passord.")
@@ -100,7 +97,7 @@ def create_trust():
                                   project=trustor.tenant_id,
                                   impersonation=True)
 
-    save_trust(session['username'], trustee.username, trust.id)
+    dbapi.save_trust(session['username'], trustee.username, trust.id)
     return redirect(url_for('trusts'))
 
 
@@ -108,5 +105,5 @@ def create_trust():
 @login_required
 def trusts():
     username = session['username']
-    trusts = get_all_trusts_by_trustor(username)
+    trusts = dbapi.get_all_trusts_by_trustor(username)
     return render_template("trusts_list.html", trusts=trusts)
