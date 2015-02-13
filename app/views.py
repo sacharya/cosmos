@@ -15,8 +15,8 @@ from keystoneclient.openstack.common.apiclient.exceptions import Unauthorized
 
 from novaclient.v1_1 import client as nova_api
 
-auth_url_v2 = config.get('default', 'auth_url_v2')
-auth_url_v3 = config.get('default', 'auth_url_v3')
+auth_url_v2 = config.get('auth_url_v2')
+auth_url_v3 = config.get('auth_url_v3')
 
 
 def login_required(f):

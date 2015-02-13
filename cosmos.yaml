@@ -1,0 +1,27 @@
+bind_address:
+    0.0.0.0
+bind_port:
+    80
+secret_key:
+    A0Zr98j/3yX R~XHH!jmN]LWX/,?RT
+db_conn_string:
+    sqlite:////tmp/test.db
+
+
+
+auth_url_v2:
+    - http://104.130.172.59:5000/v2.0/
+auth_url_v3:
+    - http://104.130.172.59:5000/v3
+
+
+
+service:
+    auth_url_v3:
+        - http://104.130.172.59:5000/v3
+    compute_url:
+        - http://104.130.172.59:8774/v2/
+    username:
+        alt_demo
+    password:
+        secrete
