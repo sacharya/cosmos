@@ -28,10 +28,10 @@ class Keystone(db.Model):
         self.auth_url = auth_url
 
 class Trusts(db.Model):
-    user_fk = Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
-    keystone_fk = Column(db.Integer, db.ForeignKey('keystone.id'), primary_key=True)
-    trust_id = Column(db.String(80), unique=True)
-    keystone = relationship('Keystone', backref='trusts')
+    user_fk = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    keystone_fk = db.Column(db.Integer, db.ForeignKey('keystone.id'), primary_key=True)
+    trust_id = db.Column(db.String(80), unique=True)
+    keystone = db.relationship('Keystone', backref='trusts')
 
     def __repr__(self):
         return '<Trust ID %s. User ID %s. Keystone ID %s.>' % (self.trust_id, self.user_fk, self.keystone_fk)
