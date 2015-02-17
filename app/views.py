@@ -15,8 +15,8 @@ from keystoneclient.openstack.common.apiclient.exceptions import Unauthorized
 
 from novaclient.v1_1 import client as nova_api
 
-auth_url_v2 = config.get('auth_url_v2')
-auth_url_v3 = config.get('auth_url_v3')
+auth_urls_v2 = config.get('auth_url_v2')
+auth_urls_v3 = config.get('auth_url_v3')
 
 
 def login_required(f):
@@ -40,10 +40,11 @@ def login():
     if request.method == 'GET':
         if 'username' in session:
             return redirect(url_for('trusts'))
-        return render_template("login.html", title="Login")
+        return render_template("login.html", title="Login", auth_urls_v3=auth_urls_v3, default_region=config.get('default_region'))
     username = request.form.get('username')
     password = request.form.get('password')
     remember_me = request.form.get('remember_me')
+
     try:
         keystone = keystonev3_api.Client(
             username=username, password=password, auth_url=auth_url_v3)

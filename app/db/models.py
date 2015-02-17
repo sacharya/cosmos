@@ -7,7 +7,7 @@ class User(db.Model):
     tenant_id = db.Column(db.String(80))
     user_id = db.Column(db.String(80))
     default_auth_url = db.Column(db.String(80))
-    trusts = db.relationship('Trusts', backref='user')
+    trusts = db.relationship('Trust', backref='user')
 
     def __init__(self, username, tenant_id, user_id, default_auth_url):
         self.username = username
@@ -27,7 +27,7 @@ class Keystone(db.Model):
     def __init__(self, auth_url):
         self.auth_url = auth_url
 
-class Trusts(db.Model):
+class Trust(db.Model):
     user_fk = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
     keystone_fk = db.Column(db.Integer, db.ForeignKey('keystone.id'), primary_key=True)
     trust_id = db.Column(db.String(80), unique=True)
