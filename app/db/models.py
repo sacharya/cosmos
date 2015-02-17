@@ -9,7 +9,7 @@ class User(db.Model):
     default_auth_url = db.Column(db.String(80))
     trusts = db.relationship('Trusts', backref=db.backref('user', lazy='dynamic'))
 
-    def __init__(self, username, tenant_id, user_id, default_auth_url, group):
+    def __init__(self, username, tenant_id, user_id, default_auth_url):
         self.username = username
         self.tenant_id = tenant_id
         self.user_id = user_id

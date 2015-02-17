@@ -8,20 +8,22 @@ db_conn_string:
     sqlite:////tmp/test.db
 
 
+default_region: region_one
 
 auth_url_v2:
-    - http://104.130.172.59:5000/v2.0/
+    region_one: http://192.168.1.22:5000/v2.0/
+    region_two: http://192.168.1.22:5000/v2.0/
 auth_url_v3:
-    - http://104.130.172.59:5000/v3
+    region_one: http://192.168.1.22:5000/v3
+    region_two: http://192.168.1.22:5000/v3
 
 
 
 service:
-    auth_url_v3:
-        - http://104.130.172.59:5000/v3
     compute_url:
-        - http://104.130.172.59:8774/v2/
+        region_one: http://192.168.1.22:8774/v2/
+        region_two: http://192.168.1.22:8774/v2/
     username:
-        alt_demo
+        robot
     password:
-        secrete
+        ostackdemo

@@ -1,5 +1,5 @@
 from app import db
-from models import Trust
+from models import Trusts
 from models import User
 
 
