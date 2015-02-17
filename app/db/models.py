@@ -7,7 +7,7 @@ class User(db.Model):
     tenant_id = db.Column(db.String(80))
     user_id = db.Column(db.String(80))
     default_auth_url = db.Column(db.String(80))
-    trusts = db.relationship('Trusts', backref=db.backref('user', lazy='dynamic'))
+    trusts = db.relationship('Trusts', backref='user')
 
     def __init__(self, username, tenant_id, user_id, default_auth_url):
         self.username = username
