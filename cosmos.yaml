@@ -1,7 +1,7 @@
 bind_address:
     0.0.0.0
 bind_port:
-    80
+    8090
 secret_key:
     A0Zr98j/3yX R~XHH!jmN]LWX/,?RT
 db_conn_string:
