@@ -11,10 +11,12 @@ Setup
     <th>Compute Endpoint</th>
   </tr>
   <tr>
-    <td><input type="checkbox" name="activate" value="username"></td>
-    <td>{{ trustee.username }}</td>
-    <td>{{ trustee.auth_url_v3 }}</td>
-    <td>{{ trustee.compute_url }}</td>
+    {% for auth_url_v3 in trustee.auth_urls_v3 %}
+      <td><input type="checkbox" name="activate" value="username"></td>
+      <td>{{ trustee.username }}</td>
+      <td>{{ auth_url_v3 }}</td>
+      <td>{{ trustee.compute_url }}</td>
+    {% endfor %}
   </tr>
 </table>
 <p/>

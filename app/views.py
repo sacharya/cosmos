@@ -40,20 +40,24 @@ def login():
     if request.method == 'GET':
         if 'username' in session:
             return redirect(url_for('trusts'))
-        return render_template("login.html", title="Login", auth_urls_v3=auth_urls_v3, default_region=config.get('default_region'))
+        return render_template("login.html", 
+                            title="Login", 
+                            auth_urls_v3=auth_urls_v3, 
+                            default_region=config.get('default_region'))
     username = request.form.get('username')
     password = request.form.get('password')
+    keystone_login_url = request.form.get('auth_url')
     remember_me = request.form.get('remember_me')
 
     try:
         keystone = keystonev3_api.Client(
-            username=username, password=password, auth_url=auth_url_v3)
+            username=username, password=password, auth_url=keystone_login_url)
         session['username'] = keystone.username
         session['token'] = keystone.auth_token
         session['tenant_id'] = keystone.tenant_id
         session['user_id'] = keystone.user_id
-        dbapi.save_or_update_user(
-            keystone.username, keystone.tenant_id, keystone.user_id)
+        dbapi.create_or_get_user(
+            keystone.username, keystone.tenant_id, keystone.user_id, keystone_login_url)
     except Unauthorized as e:
         print e
         flash("Invalid username or passord.")
@@ -70,12 +74,15 @@ def logout():
 @app.route('/setup')
 @login_required
 def setup():
+    auth_urls_v2 = config.get('auth_url_v2')
+    auth_urls_v3 = config.get('auth_url_v3')
+
+
     username = config.get('service', 'username')
-    auth_url_v3 = config.get('service', 'auth_url_v3')
     compute_url = config.get('service', 'compute_url')
     trustee = {}
     trustee['username'] = username
-    trustee['auth_url_v3'] = auth_url_v3
+    trustee['auth_urls_v3'] = auth_urls_v3
     trustee['compute_url'] = compute_url
 
     return render_template("setup.html", trustee=trustee)
