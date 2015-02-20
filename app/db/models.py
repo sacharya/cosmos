@@ -32,7 +32,9 @@ class Keystone(db.Model):
 class Trust(db.Model):
     user_fk = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
     keystone_fk = db.Column(db.Integer, db.ForeignKey('keystone.id'), primary_key=True)
-    trust_id = db.Column(db.String(80), unique=True)
+    trust_id = db.Column(db.String(80))
+    trustee_username = db.Column(db.String(80))
+    trustor_username = db.Column(db.String(80))
     keystone = db.relationship('Keystone', backref='trusts')
 
     def __repr__(self):

@@ -58,7 +58,7 @@ def login():
         session['tenant_id'] = default_keystone.tenant_id
         session['user_id'] = default_keystone.user_id
         session['default_region'] = default_region
-        session['tokens_by_url'] = {keystone_login_url: default_keystone.auth_token}
+        session['info_by_url'] = {keystone_login_url: {'username': username, 'token': default_keystone.auth_token}}
         dbapi.create_or_get_user(
             default_keystone.username, default_keystone.tenant_id, default_keystone.user_id, default_region, keystone_login_url)
     except Unauthorized as e:
@@ -67,14 +67,14 @@ def login():
         return redirect(url_for('login'))
 
     for region, keystone_url in auth_urls_v3.iteritems():
-        if keystone_url not in session['tokens_by_url'].keys():
+        if keystone_url not in session['info_by_url'].keys():
             try:
                 keystone = keystonev3_api.Client(username=username, 
                                     password=password, 
                                     auth_url=keystone_login_url)
-                session['token_by_url'][keystone_url] = keystone.auth_token
+                session['info_by_url'][keystone_url] = {'username': username, 'token': keystone.auth_token}
             except Unauthorized as e:
-                session['token_by_url'][keystone_url] = "UNAUTHORIZED"
+                session['info_by_url'][keystone_url] = "Entered user information unaccepted by url"
 
     return redirect(url_for('setup'))
 
@@ -102,7 +102,7 @@ def setup():
 @app.route('/trust', methods=['POST'])
 @login_required
 def create_trust():
-    username = config.get('service').get('username')
+    service_username = config.get('service').get('username')
     password = config.get('service').get('password')
     region = session.get('default_region')
     default_auth_url = auth_urls_v3.get(region)
@@ -110,17 +110,26 @@ def create_trust():
     current_user = dbapi.create_or_get_user(session.get('username'), default_auth_url=default_auth_url)
 
     for region, keystone_url in auth_urls_v3.iteritems():
-        trustee = keystonev3_api.Client(
-            username=username, password=password, auth_url=keystone_url)
+        try:
+            trustee = keystonev3_api.Client(
+                username=service_username, password=password, auth_url=keystone_url)
 
-        token = session['tokens_by_url'][keystone_url]
-        trustor = keystonev3_api.Client(token=token, auth_url=keystone_url)
-        trust = trustor.trusts.create(trustee.user_id, trustor.user_id,
-                                      role_names=['human'],
-                                      project=trustor.tenant_id,
-                                      impersonation=True)
-        k = dbapi.create_or_get_keystone(keystone_url)
-        dbapi.save_trust(trust_id=trust.id, keystone=k, user=current_user)
+            info = session['info_by_url'][keystone_url]
+            token = info['token']
+            trustor_username = info['username']
+            trustor = keystonev3_api.Client(token=token, auth_url=keystone_url)
+            trust = trustor.trusts.create(trustee.user_id, trustor.user_id,
+                                          role_names=['human'],
+                                          project=trustor.tenant_id,
+                                          impersonation=True)
+            k = dbapi.create_or_get_keystone(keystone_url)
+            dbapi.save_trust(trust_id=trust.id, keystone=k, 
+                            local_user=current_user, 
+                            trustor_username=trustor_username, 
+                            trustee_username=service_username)
+        except:
+            session['info_by_url'][keystone_url] = 'Keystone token expired or user %s unauthorized' % service_username
+
     return redirect(url_for('trusts'))
 
 
@@ -135,3 +144,7 @@ def trusts():
     trusts = current_user.trusts
 
     return render_template("trusts_list.html", trusts=trusts)
+
+
+
+
