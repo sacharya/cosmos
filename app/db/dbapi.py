@@ -28,7 +28,7 @@ def create_or_get_keystone(auth_url):
     return k
 
 def save_trust(trust_id=None, keystone=None, user=None):
-    t = Trust.query.filter_by(trust_id=trust_id).first()
+    t = Trust.query.filter_by(keystone=keystone, user=user).first()
     if t == None:
         t = Trust(trust_id=trust_id)
         t.keystone = keystone
@@ -38,7 +38,7 @@ def save_trust(trust_id=None, keystone=None, user=None):
         db.session.add(t)
         db.session.add(user)
         db.session.commit()
-    return k
+    return t
 
 def get_user_by_username(username):
     return User.query.filter_by(username=username).first()
