@@ -27,9 +27,9 @@ def create_or_get_keystone(auth_url):
         db.session.commit()
     return k
 
-def save_trust(trust_id=None, keystone=None, trustor_user=None, trustee_username=None):
+def save_trust(trust_id=None, keystone=None, local_user=None, trustor_username=None, trustee_username=None):
     t = Trust.query.filter_by(keystone=keystone, 
-                              user=user, 
+                              user=local_user, 
                               trustor_username=trustor_username, 
                               trustee_username=trustee_username).first()
 
