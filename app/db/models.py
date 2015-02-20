@@ -6,13 +6,15 @@ class User(db.Model):
     username = db.Column(db.String(80))
     tenant_id = db.Column(db.String(80))
     user_id = db.Column(db.String(80))
+    default_region = db.Column(db.String(80))
     default_auth_url = db.Column(db.String(80))
     trusts = db.relationship('Trust', backref='user')
 
-    def __init__(self, username, tenant_id, user_id, default_auth_url):
+    def __init__(self, username, tenant_id, user_id, default_region, default_auth_url):
         self.username = username
         self.tenant_id = tenant_id
         self.user_id = user_id
+        self.default_region = default_region
         self.default_auth_url = default_auth_url
     def __repr__(self):
         return '<Username %s. Tenant ID %s. Keystone %s.>' % (self.username, self.tenant_id, self.default_auth_url)

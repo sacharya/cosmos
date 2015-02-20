@@ -57,7 +57,7 @@ def login():
         session['tenant_id'] = keystone.tenant_id
         session['user_id'] = keystone.user_id
         dbapi.create_or_get_user(
-            keystone.username, keystone.tenant_id, keystone.user_id, keystone_login_url)
+            keystone.username, keystone.tenant_id, keystone.user_id, region, keystone_login_url)
     except Unauthorized as e:
         print e
         flash("Invalid username or passord.")
@@ -74,16 +74,12 @@ def logout():
 @app.route('/setup')
 @login_required
 def setup():
-    auth_urls_v2 = config.get('auth_url_v2')
-    auth_urls_v3 = config.get('auth_url_v3')
-
-
-    username = config.get('service', 'username')
-    compute_url = config.get('service', 'compute_url')
+    username = config.get('service').get('username')
+    compute_url = config.get('service').get('compute_url')
     trustee = {}
     trustee['username'] = username
     trustee['auth_urls_v3'] = auth_urls_v3
-    trustee['compute_url'] = compute_url
+    trustee['compute_url'] = compute_url['']
 
     return render_template("setup.html", trustee=trustee)
 
