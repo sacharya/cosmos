@@ -58,6 +58,7 @@ def login():
         session['tenant_id'] = default_keystone.tenant_id
         session['user_id'] = default_keystone.user_id
         session['default_region'] = default_region
+        session['tokens_by_url'] = {keystone_login_url: default_keystone.auth_token}
         dbapi.create_or_get_user(
             default_keystone.username, default_keystone.tenant_id, default_keystone.user_id, default_region, keystone_login_url)
     except Unauthorized as e:
@@ -66,9 +67,7 @@ def login():
         return redirect(url_for('login'))
 
     for region, keystone_url in auth_urls_v3.iteritems():
-        if region == default_region:
-            session['tokens_by_url'][keystone_url] = default_keystone.auth_token
-        else:
+        if keystone_url not in session['tokens_by_url'].keys():
             try:
                 keystone = keystonev3_api.Client(username=username, 
                                     password=password, 
