@@ -110,7 +110,6 @@ def create_trust():
     current_user = dbapi.create_or_get_user(session.get('username'), default_auth_url=default_auth_url)
 
     for region, keystone_url in auth_urls_v3.iteritems():
-        try:
             trustee = keystonev3_api.Client(
                 username=service_username, password=password, auth_url=keystone_url)
 
@@ -127,8 +126,7 @@ def create_trust():
                             local_user=current_user, 
                             trustor_username=trustor_username, 
                             trustee_username=service_username)
-        except:
-            session['info_by_url'][keystone_url] = 'Keystone token expired or user %s unauthorized' % service_username
+        
 
     return redirect(url_for('trusts'))
 
