@@ -20,7 +20,7 @@ def create_or_get_user(username, tenant_id=None, user_id=None, default_region=No
     return u
 
 def create_or_get_keystone(auth_url):
-    k = Keystone.query.filter_by(auth_url=default_auth_url).first()
+    k = Keystone.query.filter_by(auth_url=auth_url).first()
     if k == None:
         k = Keystone(auth_url=auth_url)
         db.session.add(k)

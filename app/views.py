@@ -113,10 +113,10 @@ def create_trust():
         trustee = keystonev3_api.Client(
             username=username, password=password, auth_url=keystone_url)
 
-        token = session['token_by_url'][keystone_url]
+        token = session['tokens_by_url'][keystone_url]
         trustor = keystonev3_api.Client(token=token, auth_url=keystone_url)
         trust = trustor.trusts.create(trustee.user_id, trustor.user_id,
-                                      #role_names=['Member'],
+                                      role_names=['human'],
                                       project=trustor.tenant_id,
                                       impersonation=True)
         k = dbapi.create_or_get_keystone(keystone_url)
