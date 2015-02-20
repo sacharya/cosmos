@@ -11,7 +11,7 @@
 {% block content %}
 <form action="/login" method="post" name="login">
   <p><label>Region</label>
-    <select name="auth_url">
+    <select name="region">
         {% for region, url in auth_urls_v3.iteritems() %}
           {% if region == default_region %}
           <option value="{{region}}" selected="selected">{{region}}</option>
