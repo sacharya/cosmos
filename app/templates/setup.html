@@ -15,7 +15,7 @@ Setup
         <td><input type="checkbox" name="activate" value="username"></td>
         <td>{{ trustee.username }}</td>
         <td>{{ auth_url_v3 }}</td>
-        <td>{{ trustee.compute_url.region }}</td>
+        <td>{{ trustee.compute_url[region] }}</td>
     </tr>
     {% endfor %}
 </table>

@@ -16,13 +16,13 @@ auth_url_v2:
 auth_url_v3:
     region_one: http://192.168.1.22:5000/v3
     region_two: http://192.168.1.22:5000/v3
-
+compute_url:
+    region_one: http://192.168.1.22:8774/v2/
+    region_two: http://192.168.1.22:8774/v2/
 
 
 service:
-    compute_url:
-        region_one: http://192.168.1.22:8774/v2/
-        region_two: http://192.168.1.22:8774/v2/
+
     username:
         robot
     password:
