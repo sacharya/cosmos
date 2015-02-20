@@ -10,12 +10,12 @@ Setup
     <th>Auth V3 Endpoint</th>
     <th>Compute Endpoint</th>
   </tr>
-    {% for auth_url_v3 in trustee.auth_urls_v3 %}
+    {% for region, auth_url_v3 in trustee.auth_urls_v3.iteritems() %}
     <tr>
         <td><input type="checkbox" name="activate" value="username"></td>
         <td>{{ trustee.username }}</td>
         <td>{{ auth_url_v3 }}</td>
-        <td>{{ trustee.compute_url }}</td>
+        <td>{{ trustee.compute_url.region }}</td>
     </tr>
     {% endfor %}
 </table>

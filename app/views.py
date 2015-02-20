@@ -82,7 +82,7 @@ def setup():
     trustee = {}
     trustee['username'] = username
     trustee['auth_urls_v3'] = auth_urls_v3
-    trustee['compute_url'] = compute_url[region]
+    trustee['compute_url'] = compute_url
 
     return render_template("setup.html", trustee=trustee)
 
