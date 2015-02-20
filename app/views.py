@@ -46,8 +46,9 @@ def login():
                             default_region=config.get('default_region'))
     username = request.form.get('username')
     password = request.form.get('password')
-    keystone_login_url = request.form.get('auth_url')
+    region = request.form.get('region')
     remember_me = request.form.get('remember_me')
+    keystone_login_url = auth_urls_v3[region]
 
     try:
         keystone = keystonev3_api.Client(

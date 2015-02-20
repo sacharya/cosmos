@@ -14,9 +14,9 @@
     <select name="auth_url">
         {% for region, url in auth_urls_v3.iteritems() %}
           {% if region == default_region %}
-          <option value="{{url}}" selected="selected">{{region}}</option>
+          <option value="{{region}}" selected="selected">{{region}}</option>
           {% else %}
-          <option value="{{url}}">{{region}}</option>
+          <option value="{{region}}">{{region}}</option>
           {% endif %}
         {% endfor %}
     </select>
