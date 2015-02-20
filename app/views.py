@@ -57,6 +57,7 @@ def login():
         session['token'] = keystone.auth_token
         session['tenant_id'] = keystone.tenant_id
         session['user_id'] = keystone.user_id
+        session['region'] = region
         dbapi.create_or_get_user(
             keystone.username, keystone.tenant_id, keystone.user_id, region, keystone_login_url)
     except Unauthorized as e:
@@ -77,10 +78,11 @@ def logout():
 def setup():
     username = config.get('service').get('username')
     compute_url = config.get('service').get('compute_url')
+    region = session.get('region')
     trustee = {}
     trustee['username'] = username
     trustee['auth_urls_v3'] = auth_urls_v3
-    trustee['compute_url'] = compute_url['']
+    trustee['compute_url'] = compute_url[region]
 
     return render_template("setup.html", trustee=trustee)
 
