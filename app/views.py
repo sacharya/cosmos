@@ -89,12 +89,12 @@ def logout():
 @login_required
 def setup():
     username = config.get('service').get('username')
-    compute_urls = config.get('service').get('compute_url')
+    compute_urls = config.get('compute_url')
     region = session.get('default_region')
     trustee = {}
     trustee['username'] = username
     trustee['auth_urls_v3'] = auth_urls_v3
-    trustee['compute_url'] = compute_url
+    trustee['compute_urls'] = compute_urls
 
     return render_template("setup.html", trustee=trustee)
 
