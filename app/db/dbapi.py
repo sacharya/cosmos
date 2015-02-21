@@ -38,11 +38,11 @@ def save_trust(trust_id=None, keystone=None, local_user=None, trustor_username=N
                 trustor_username=trustor_username, 
                 trustee_username=trustee_username)
         t.keystone = keystone
-        t.user = user
-        user.trusts.append(t)
+        t.user = local_user
+        local_user.trusts.append(t)
 
         db.session.add(t)
-        db.session.add(user)
+        db.session.add(local_user)
         db.session.commit()
     return t
 

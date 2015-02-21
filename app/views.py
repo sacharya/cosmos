@@ -127,7 +127,7 @@ def create_trust():
                                 local_user=current_user, 
                                 trustor_username=trustor_username, 
                                 trustee_username=service_username)
-            except:
+            except Exception, e:
                 #replace with logging
                 print e
                 session['info_by_url'][keystone_url] = 'Keystone token expired or user %s unauthorized' % service_username
