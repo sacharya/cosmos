@@ -110,22 +110,27 @@ def create_trust():
     current_user = dbapi.create_or_get_user(session.get('username'), default_auth_url=default_auth_url)
 
     for region, keystone_url in auth_urls_v3.iteritems():
-            trustee = keystonev3_api.Client(
-                username=service_username, password=password, auth_url=keystone_url)
+            try:
+                trustee = keystonev3_api.Client(
+                    username=service_username, password=password, auth_url=keystone_url)
 
-            info = session['info_by_url'][keystone_url]
-            token = info['token']
-            trustor_username = info['username']
-            trustor = keystonev3_api.Client(token=token, auth_url=keystone_url)
-            trust = trustor.trusts.create(trustee.user_id, trustor.user_id,
-                                          role_names=['human'],
-                                          project=trustor.tenant_id,
-                                          impersonation=True)
-            k = dbapi.create_or_get_keystone(keystone_url)
-            dbapi.save_trust(trust_id=trust.id, keystone=k, 
-                            local_user=current_user, 
-                            trustor_username=trustor_username, 
-                            trustee_username=service_username)
+                info = session['info_by_url'][keystone_url]
+                token = info['token']
+                trustor_username = info['username']
+                trustor = keystonev3_api.Client(token=token, auth_url=keystone_url)
+                trust = trustor.trusts.create(trustee.user_id, trustor.user_id,
+                                              role_names=['human'],
+                                              project=trustor.tenant_id,
+                                              impersonation=True)
+                k = dbapi.create_or_get_keystone(keystone_url)
+                dbapi.save_trust(trust_id=trust.id, keystone=k, 
+                                local_user=current_user, 
+                                trustor_username=trustor_username, 
+                                trustee_username=service_username)
+            except:
+                #replace with logging
+                print e
+                session['info_by_url'][keystone_url] = 'Keystone token expired or user %s unauthorized' % service_username
         
 
     return redirect(url_for('trusts'))
