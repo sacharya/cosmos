@@ -4,7 +4,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-conn_string = config.get('database', 'conn_string')
+conn_string = config.get('db_conn_string')
 app.config['SQLALCHEMY_DATABASE_URI'] = conn_string
 db = SQLAlchemy(app)
 

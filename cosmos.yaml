@@ -1,0 +1,29 @@
+bind_address:
+    0.0.0.0
+bind_port:
+    8090
+secret_key:
+    A0Zr98j/3yX R~XHH!jmN]LWX/,?RT
+db_conn_string:
+    sqlite:////tmp/test.db
+
+
+default_region: region_one
+
+auth_url_v2:
+    region_one: http://192.168.1.22:5000/v2.0/
+    region_two: http://192.168.1.22:5000/v2.0/
+auth_url_v3:
+    region_one: http://192.168.1.22:5000/v3
+    region_two: http://192.168.1.22:5000/v3
+compute_url:
+    region_one: http://192.168.1.22:8774/v2/
+    region_two: http://192.168.1.22:8774/v2/
+
+
+service:
+
+    username:
+        robot
+    password:
+        ostackdemo

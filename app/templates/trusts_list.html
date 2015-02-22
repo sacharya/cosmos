@@ -6,13 +6,15 @@ List Trusts
   <tr>
     <th>Trustor</th>
     <th>Trustee</th>
-    <th>Trust</th>
+    <th>Trust ID</th>
+    <th>Auth URL</th>
   </tr>
   {% for trust in trusts %}
   <tr>
     <td>{{ trust.trustor_username }}</td>
     <td>{{ trust.trustee_username }}</td>
     <td>{{ trust.trust_id }}</td>
+    <td>{{ trust.keystone.auth_url }}</td>
   </tr>
   {% endfor %}
 </table>

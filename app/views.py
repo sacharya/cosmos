@@ -15,8 +15,8 @@ from keystoneclient.openstack.common.apiclient.exceptions import Unauthorized
 
 from novaclient.v1_1 import client as nova_api
 
-auth_url_v2 = config.get('default', 'auth_url_v2')
-auth_url_v3 = config.get('default', 'auth_url_v3')
+auth_urls_v2 = config.get('auth_url_v2')
+auth_urls_v3 = config.get('auth_url_v3')
 
 
 def login_required(f):
@@ -40,23 +40,42 @@ def login():
     if request.method == 'GET':
         if 'username' in session:
             return redirect(url_for('trusts'))
-        return render_template("login.html", title="Login")
+        return render_template("login.html", 
+                            title="Login", 
+                            auth_urls_v3=auth_urls_v3, 
+                            default_region=config.get('default_region'))
     username = request.form.get('username')
     password = request.form.get('password')
+    default_region = request.form.get('region')
     remember_me = request.form.get('remember_me')
+    keystone_login_url = auth_urls_v3[default_region]
+
     try:
-        keystone = keystonev3_api.Client(
-            username=username, password=password, auth_url=auth_url_v3)
-        session['username'] = keystone.username
-        session['token'] = keystone.auth_token
-        session['tenant_id'] = keystone.tenant_id
-        session['user_id'] = keystone.user_id
-        dbapi.save_or_update_user(
-            keystone.username, keystone.tenant_id, keystone.user_id)
+        default_keystone = keystonev3_api.Client(
+            username=username, password=password, auth_url=keystone_login_url)
+        session['username'] = default_keystone.username
+        session['token'] = default_keystone.auth_token
+        session['tenant_id'] = default_keystone.tenant_id
+        session['user_id'] = default_keystone.user_id
+        session['default_region'] = default_region
+        session['info_by_url'] = {keystone_login_url: {'username': username, 'token': default_keystone.auth_token}}
+        dbapi.create_or_get_user(
+            default_keystone.username, default_keystone.tenant_id, default_keystone.user_id, default_region, keystone_login_url)
     except Unauthorized as e:
         print e
         flash("Invalid username or passord.")
         return redirect(url_for('login'))
+
+    for region, keystone_url in auth_urls_v3.iteritems():
+        if keystone_url not in session['info_by_url'].keys():
+            try:
+                keystone = keystonev3_api.Client(username=username, 
+                                    password=password, 
+                                    auth_url=keystone_login_url)
+                session['info_by_url'][keystone_url] = {'username': username, 'token': keystone.auth_token}
+            except Unauthorized as e:
+                session['info_by_url'][keystone_url] = "Entered user information unaccepted by url"
+
     return redirect(url_for('setup'))
 
 
@@ -66,16 +85,16 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/setup')
+@app.route('/setup') 
 @login_required
 def setup():
-    username = config.get('service', 'username')
-    auth_url_v3 = config.get('service', 'auth_url_v3')
-    compute_url = config.get('service', 'compute_url')
+    username = config.get('service').get('username')
+    compute_urls = config.get('compute_url')
+    region = session.get('default_region')
     trustee = {}
     trustee['username'] = username
-    trustee['auth_url_v3'] = auth_url_v3
-    trustee['compute_url'] = compute_url
+    trustee['auth_urls_v3'] = auth_urls_v3
+    trustee['compute_urls'] = compute_urls
 
     return render_template("setup.html", trustee=trustee)
 
@@ -83,23 +102,37 @@ def setup():
 @app.route('/trust', methods=['POST'])
 @login_required
 def create_trust():
-    username = config.get('service', 'username')
-    password = config.get('service', 'password')
-    auth_url_v3 = config.get('service', 'auth_url_v3')
-    compute_url = config.get('service', 'compute_url')
+    service_username = config.get('service').get('username')
+    password = config.get('service').get('password')
+    region = session.get('default_region')
+    default_auth_url = auth_urls_v3.get(region)
 
-    trustee = keystonev3_api.Client(
-        username=username, password=password, auth_url=auth_url_v3)
+    current_user = dbapi.create_or_get_user(session.get('username'), default_auth_url=default_auth_url)
 
-    token = session['token']
-    print token
-    trustor = keystonev3_api.Client(token=token, auth_url=auth_url_v3)
-    trust = trustor.trusts.create(trustee.user_id, session['user_id'],
-                                  role_names=['Member'],
-                                  project=trustor.tenant_id,
-                                  impersonation=True)
+    for region, keystone_url in auth_urls_v3.iteritems():
+            try:
+                trustee = keystonev3_api.Client(
+                    username=service_username, password=password, auth_url=keystone_url)
 
-    dbapi.save_trust(session['username'], trustee.username, trust.id)
+                info = session['info_by_url'][keystone_url]
+                token = info['token']
+                trustor_username = info['username']
+                trustor = keystonev3_api.Client(token=token, auth_url=keystone_url)
+                trust = trustor.trusts.create(trustee.user_id, trustor.user_id,
+                                              role_names=['human'],
+                                              project=trustor.tenant_id,
+                                              impersonation=True)
+                k = dbapi.create_or_get_keystone(keystone_url)
+                dbapi.save_trust(trust_id=trust.id, keystone=k, 
+                                local_user=current_user, 
+                                trustor_username=trustor_username, 
+                                trustee_username=service_username)
+            except Exception, e:
+                #replace with logging
+                print e
+                session['info_by_url'][keystone_url] = 'Keystone token expired or user %s unauthorized' % service_username
+        
+
     return redirect(url_for('trusts'))
 
 
@@ -107,5 +140,14 @@ def create_trust():
 @login_required
 def trusts():
     username = session['username']
-    trusts = dbapi.get_all_trusts_by_trustor(username)
+    region = session.get('default_region')
+    default_auth_url = auth_urls_v3.get(region)
+
+    current_user = dbapi.create_or_get_user(username, default_auth_url=default_auth_url)
+    trusts = current_user.trusts
+
     return render_template("trusts_list.html", trusts=trusts)
+
+
+
+

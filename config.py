@@ -1,4 +1,6 @@
-from ConfigParser import ConfigParser
+import yaml
 
-config = ConfigParser()
-config.readfp(open('cosmos.conf'))
+
+conf_file = open('cosmos.yaml')
+config = yaml.safe_load(conf_file)
+conf_file.close()

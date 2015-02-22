@@ -6,29 +6,36 @@ class User(db.Model):
     username = db.Column(db.String(80))
     tenant_id = db.Column(db.String(80))
     user_id = db.Column(db.String(80))
+    default_region = db.Column(db.String(80))
+    default_auth_url = db.Column(db.String(80))
+    trusts = db.relationship('Trust', backref='user')
 
-    def __init__(self, username, tenant_id, user_id):
+    def __init__(self, username, tenant_id, user_id, default_region, default_auth_url):
         self.username = username
         self.tenant_id = tenant_id
         self.user_id = user_id
-
+        self.default_region = default_region
+        self.default_auth_url = default_auth_url
     def __repr__(self):
-        return '<Username %s. Tenant ID %s. User ID %s>' % (self.username, self.tenant_id, self.user_id)
+        return '<Username %s. Tenant ID %s. Keystone %s.>' % (self.username, self.tenant_id, self.default_auth_url)
 
     def is_authenticated(self):
         return True
 
+class Keystone(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    auth_url = db.Column(db.String(80))
+
+    def __init__(self, auth_url):
+        self.auth_url = auth_url
 
 class Trust(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    trustor_username = db.Column(db.String(80))
+    user_fk = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    keystone_fk = db.Column(db.Integer, db.ForeignKey('keystone.id'), primary_key=True)
+    trust_id = db.Column(db.String(80))
     trustee_username = db.Column(db.String(80))
-    trust_id = db.Column(db.String(80), unique=True)
-
-    def __init__(self, trustor_username, trustee_username, trust_id):
-        self.trustor_username = trustor_username
-        self.trustee_username = trustee_username
-        self.trust_id = trust_id
+    trustor_username = db.Column(db.String(80))
+    keystone = db.relationship('Keystone', backref='trusts')
 
     def __repr__(self):
-        return '<Trustor User %s. Trustee User %s. Trust ID %s>' % (self.trustor_username, self.trustee_username, self.trust_id)
+        return '<Trust ID %s. User ID %s. Keystone ID %s.>' % (self.trust_id, self.user_fk, self.keystone_fk)
