@@ -2,3 +2,4 @@ python-keystoneclient
 python-novaclient
 Flask-SQLAlchemy
 pep8
+pyyaml
