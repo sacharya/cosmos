@@ -149,5 +149,10 @@ def trusts():
     return render_template("trusts_list.html", trusts=trusts)
 
 
+@app.route('/upload', methods=['GET', 'POST'])
+@login_required
+def upload():
+    if request.method == 'GET':
+        return render_template("upload.html")
 
 

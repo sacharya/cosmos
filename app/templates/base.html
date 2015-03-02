@@ -8,7 +8,8 @@
 </head>
 <body>
 {% if session['username'] %}
-<a href="/setup">Setup</a> | <a href="/trusts">Trusts</a> | <a href="/logout">Logout</a><br/>
+<a href="/setup">Setup</a> | <a href="/trusts">Trusts</a> | <a
+  href="/upload">Upload</a> | <a href="/logout">Logout</a><br/>
 {% endif %}
 {% block content %}{% endblock %}
 </body>
