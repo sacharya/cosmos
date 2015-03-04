@@ -1,3 +1,4 @@
+python-glanceclient
 python-keystoneclient
 python-novaclient
 Flask-SQLAlchemy

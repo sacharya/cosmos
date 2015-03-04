@@ -3,6 +3,9 @@ from models import Trust
 from models import User
 from models import Keystone
 
+def get_all_trusts():
+  return Trust.query.all()
+
 def get_all_trusts_by_trustor(trustor_username):
     return Trust.query.filter_by(trustor_username=trustor_username).all()
 
